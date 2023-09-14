@@ -5,3 +5,5 @@ dataset/
 logs/
 outputs/
 venv/
+.venv/
+.envrc
