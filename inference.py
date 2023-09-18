@@ -1,24 +1,40 @@
-import torch
 import albumentations
+import hydra
 import numpy as np
+import torch
+import torchvision.transforms as transforms
 from PIL import Image
 
 from models.crnn import CRNN
-from utils.model_decoders import decode_predictions, decode_padded_predictions
+from utils.model_decoders import decode_padded_predictions, decode_predictions
 
 # I use "∅" to denote the blank token. This list is automatically generated at training,
 # but I recommend that you hardcode your characters at evaluation
 classes = [
     "∅",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N",
+    "P",
+    "R",
+    "S",
+    "T",
+    "U",
+    "V",
+    "W",
+    "X",
+    "Y",
+    "Z",
     "a",
     "b",
     "c",
@@ -27,15 +43,13 @@ classes = [
     "f",
     "g",
     "h",
-    "i",
     "j",
     "k",
-    "l",
     "m",
     "n",
     "o",
     "p",
-    "q",
+    "q",  # THIS SHOULD NOT EXIST LOL
     "r",
     "s",
     "t",
@@ -48,26 +62,44 @@ classes = [
 ]
 
 
-def inference(image_path):
-    # Hardcoded resize
-    image = Image.open(image_path).convert("RGB")
-    image = image.resize((180, 50), resample=Image.BILINEAR)
-    image = np.array(image)
+def load_image(path, cfg):
+    image = Image.open(path).convert("RGB")
 
-    # ImageNet mean and std (not required, but if you trained with, keep it)
+    image = image.resize((cfg.processing.image_width, cfg.processing.image_height), resample=Image.BILINEAR)
+
     mean = (0.485, 0.456, 0.406)
     std = (0.229, 0.224, 0.225)
-    aug = albumentations.Compose([albumentations.Normalize(mean, std, max_pixel_value=255.0, always_apply=True)])
+    aug = albumentations.Compose(
+        [
+            albumentations.Normalize(mean, std, max_pixel_value=255.0, always_apply=True),
+        ]
+    )
 
-    image = aug(image=image)["image"]
-    image = np.transpose(image, (2, 0, 1)).astype(np.float32)
+    transform = transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
+
+    if cfg.model.gray_scale:
+        image = transform(image)
+    else:
+        image = np.array(image)
+        augmented = aug(image=image)
+        image = augmented["image"]
+        image = np.transpose(image, (2, 0, 1)).astype(np.float32)
+        image = torch.tensor(image, dtype=torch.float)
+
+    return image
+
+
+def inference(image_path, model, cfg):
+    device = torch.device(cfg.processing.device)
+
+    image = load_image(image_path, cfg)
     image = image[None, ...]
-    image = torch.from_numpy(image)
+
     if str(device) == "cuda":
         image = image.cuda()
     image = image.float()
     with torch.no_grad():
-        preds, _ = model(image)
+        preds, _ = model(images=image)
 
     if model.use_ctc:
         answer = decode_predictions(preds, classes)
@@ -76,13 +108,24 @@ def inference(image_path):
     return answer
 
 
-if __name__ == "__main__":
+@hydra.main(config_path="./configs", config_name="config", version_base=None)
+def main(cfg):
     # Setup model and load weights
-    model = CRNN(dims=256, num_chars=35, use_attention=True, use_ctc=True)
-    device = torch.device("cuda")
-    model.to(device)
-    model.load_state_dict(torch.load("./logs/crnn.pth"))
+    device = torch.device(cfg.processing.device)
+    model = CRNN(
+        resolution=(cfg.processing.image_width, cfg.processing.image_height),
+        dims=cfg.model.dims,
+        num_chars=len(classes) - 1,  # because of "∅"
+        use_attention=cfg.model.use_attention,
+        use_ctc=cfg.model.use_ctc,
+        grayscale=cfg.model.gray_scale,
+    ).to(device)
+    model.load_state_dict(torch.load(cfg.paths.save_model_as))
     model.eval()
-    filepath = "sample.png"
-    answer = inference(filepath)
+    filepath = "dataset/eBwsgwf.png"
+    answer = inference(filepath, model, cfg)
     print(f"text: {answer}")
+
+
+if __name__ == "__main__":
+    main()
