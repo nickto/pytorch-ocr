@@ -1,20 +1,19 @@
-from typing import List
+from typing import List, Optional, Tuple
 
 import albumentations
 import numpy as np
 import torch
 import torchvision.transforms as transforms
-from omegaconf import DictConfig
 from PIL import Image
 
 from pytorch_ocr.models.crnn import CRNN
 from pytorch_ocr.utils.model_decoders import decode_padded_predictions, decode_predictions
 
 
-def load_image(path: str, cfg: DictConfig):
+def load_image(path: str, resize: Optional[Tuple[int, int]] = None, grayscale: bool = False):
     image = Image.open(path).convert("RGB")
 
-    image = image.resize((cfg.processing.image_width, cfg.processing.image_height), resample=Image.BILINEAR)
+    image = image.resize(resize, resample=Image.BILINEAR)  # resize: (width, height)
 
     mean = (0.485, 0.456, 0.406)
     std = (0.229, 0.224, 0.225)
@@ -26,7 +25,7 @@ def load_image(path: str, cfg: DictConfig):
 
     transform = transforms.Compose([transforms.Grayscale(), transforms.ToTensor()])
 
-    if cfg.model.gray_scale:
+    if grayscale:
         image = transform(image)
     else:
         image = np.array(image)
@@ -38,10 +37,8 @@ def load_image(path: str, cfg: DictConfig):
     return image
 
 
-def infer(image_path, model: CRNN, classes: List[str], cfg: DictConfig):
-    device = torch.device(cfg.processing.device)
-
-    image = load_image(image_path, cfg)
+def infer(image_path, model: CRNN, classes: List[str], device: str = "cpu"):
+    image = load_image(image_path, resize=model.resolution, grayscale=model.grayscale)
     image = image[None, ...]
 
     if str(device) == "cuda":
