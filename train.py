@@ -14,6 +14,7 @@ from models.crnn import CRNN
 from utils.plot import plot_acc, plot_losses
 from utils.model_decoders import decode_predictions, decode_padded_predictions
 from utils.data_loading import build_dataloaders
+from models.saver_loader import save_model
 
 
 # Setup rich console
@@ -111,13 +112,13 @@ def run_training(cfg):
         console.print(table)
         logger.info(f"Epoch {epoch}:    Train loss: {train_loss}    Test loss: {test_loss}    Accuracy: {accuracy}")
 
-    # 4. Save model + logging and plotting
+    # 4. Save model + logging and plotting + classes
     logger.info(f"Finished training. Best Accuracy was: {(best_acc*100):.2f}%")
     model.load_state_dict(best_model_wts)
-    torch.save(model.state_dict(), cfg.paths.save_model_as)
+    save_model(model, training_classes, cfg.paths.save_model_as)
     logger.info(f"Saving model on {cfg.paths.save_model_as}\nTraining time: {datetime.now()-start}")
-    plot_losses(train_loss_data, valid_loss_data)
-    plot_acc(accuracy_data)
+    plot_losses(train_loss_data, valid_loss_data, cfg)
+    plot_acc(accuracy_data, cfg)
 
 
 if __name__ == "__main__":

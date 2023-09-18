@@ -28,9 +28,12 @@ class CRNN(nn.Module):
     ):
         super().__init__()
         self.resolution = resolution
-        self.grayscale = grayscale
-        self.use_ctc = use_ctc
+        self.dims = dims
+        self.num_chars = num_chars
         self.use_attention = use_attention
+        self.use_ctc = use_ctc
+        self.grayscale = grayscale
+
         self.num_classes = num_chars + 1
 
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
