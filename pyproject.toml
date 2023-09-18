@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "pytorch-ocr"
-version = "0.1.0"
-description = ""
-authors = [""]
+version = "0.2.0"
+description = "Simple framework for OCR using PyTorch."
+authors = ["Gabriel Dornelles", "Nick To <nick@nickto.net>"]
 license = "MIT"
 readme = "README.md"
 
@@ -11,9 +11,9 @@ python = ">=3.9,<3.11"
 torch = "1.12.0"
 torchvision = "0.13.0"
 albumentations = "1.2.1"
-numpy = "1.21.5"
+numpy = "^1.25"
 rich = "13.0.0"
-hydra-core = "1.3.1"
+hydra-core = "^1.3.2"
 matplotlib = "3.5.3"
 pytest = "^7.4.2"
 
