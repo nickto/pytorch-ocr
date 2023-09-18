@@ -4,8 +4,7 @@ from typing import List, Tuple
 
 import torch
 import yaml
-from models.crnn import CRNN
-from omegaconf import DictConfig
+from .crnn import CRNN
 
 
 def save_model(model: CRNN, classes: List[str], path: str, override: bool = False):

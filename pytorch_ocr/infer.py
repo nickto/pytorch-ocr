@@ -1,68 +1,17 @@
+from typing import List
+
 import albumentations
-import hydra
 import numpy as np
 import torch
 import torchvision.transforms as transforms
+from omegaconf import DictConfig
 from PIL import Image
 
 from pytorch_ocr.models.crnn import CRNN
 from pytorch_ocr.utils.model_decoders import decode_padded_predictions, decode_predictions
 
-# I use "∅" to denote the blank token. This list is automatically generated at training,
-# but I recommend that you hardcode your characters at evaluation
-classes = [
-    "∅",
-    "A",
-    "B",
-    "C",
-    "D",
-    "E",
-    "F",
-    "G",
-    "H",
-    "J",
-    "K",
-    "L",
-    "M",
-    "N",
-    "P",
-    "R",
-    "S",
-    "T",
-    "U",
-    "V",
-    "W",
-    "X",
-    "Y",
-    "Z",
-    "a",
-    "b",
-    "c",
-    "d",
-    "e",
-    "f",
-    "g",
-    "h",
-    "j",
-    "k",
-    "m",
-    "n",
-    "o",
-    "p",
-    "q",  # THIS SHOULD NOT EXIST LOL
-    "r",
-    "s",
-    "t",
-    "u",
-    "v",
-    "w",
-    "x",
-    "y",
-    "z",
-]
 
-
-def load_image(path, cfg):
+def load_image(path: str, cfg: DictConfig):
     image = Image.open(path).convert("RGB")
 
     image = image.resize((cfg.processing.image_width, cfg.processing.image_height), resample=Image.BILINEAR)
@@ -89,7 +38,7 @@ def load_image(path, cfg):
     return image
 
 
-def inference(image_path, model, cfg):
+def infer(image_path, model: CRNN, classes: List[str], cfg: DictConfig):
     device = torch.device(cfg.processing.device)
 
     image = load_image(image_path, cfg)
@@ -106,26 +55,3 @@ def inference(image_path, model, cfg):
     else:
         answer = decode_padded_predictions(preds, classes)
     return answer
-
-
-@hydra.main(config_path="./configs", config_name="config", version_base=None)
-def main(cfg):
-    # Setup model and load weights
-    device = torch.device(cfg.processing.device)
-    model = CRNN(
-        resolution=(cfg.processing.image_width, cfg.processing.image_height),
-        dims=cfg.model.dims,
-        num_chars=len(classes) - 1,  # because of "∅"
-        use_attention=cfg.model.use_attention,
-        use_ctc=cfg.model.use_ctc,
-        grayscale=cfg.model.gray_scale,
-    ).to(device)
-    model.load_state_dict(torch.load(cfg.paths.save_model_as))
-    model.eval()
-    filepath = "dataset/eBwsgwf.png"
-    answer = inference(filepath, model, cfg)
-    print(f"text: {answer}")
-
-
-if __name__ == "__main__":
-    main()

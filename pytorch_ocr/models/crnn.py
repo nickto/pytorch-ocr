@@ -2,7 +2,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 from torchvision.models import resnet18, ResNet18_Weights
-from models.attention import Attention  # , SelfAttention
+from .attention import Attention  # , SelfAttention
 from torch import Tensor
 
 
