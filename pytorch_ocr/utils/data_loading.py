@@ -57,7 +57,10 @@ class ClassificationDataset:
 
 
 def build_dataloaders(cfg):
-    image_files = glob.glob(os.path.join(cfg.paths.dataset_dir, "*.png"))
+    # image_files = glob.glob(os.path.join(cfg.paths.dataset_dir, "*.png"))
+    # TODO: return to the original (line above)
+    image_files = glob.glob(os.path.join(cfg.paths.dataset_dir, "???????.png"))
+
     original_targets = [x.split("/")[-1][:-4].replace("-copy", "") for x in image_files]
     targets = [[c for c in x] for x in original_targets]
     targets_flat = [c for clist in targets for c in clist]

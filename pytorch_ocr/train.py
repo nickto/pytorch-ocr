@@ -44,12 +44,14 @@ def run_training(cfg):
         use_attention=cfg.model.use_attention,
         use_ctc=cfg.model.use_ctc,
         grayscale=cfg.model.gray_scale,
+        sequence_length=7, # this is manually set for now
     ).to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=cfg.training.lr)
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=0.8, patience=5, verbose=True)
 
-    best_acc = 0.0
+    best_acc = -1
+    best_loss = torch.inf
     train_loss_data = []
     valid_loss_data = []
     accuracy_data = []
@@ -97,8 +99,14 @@ def run_training(cfg):
         accuracy = metrics.accuracy_score(test_original_targets, valid_captcha_preds)
         accuracy_data.append(accuracy)
 
-        if accuracy > best_acc:
+        if accuracy >= best_acc:
+            if accuracy == best_acc and test_loss > best_loss:
+                continue
+
             best_acc = accuracy
+            if test_loss < best_loss:
+                best_loss = test_loss
+
             logger.info(f"New best accuracy achieved at epoch {epoch}. Best accuracy now is: {best_acc}")
             best_model_wts = copy.deepcopy(model.state_dict())
             if cfg.bools.SAVE_CHECKPOINTS:

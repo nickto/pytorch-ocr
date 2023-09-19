@@ -1,9 +1,15 @@
+import logging
+from typing import Optional
+
 import torch
-from torch import nn
+from torch import Tensor, nn
 from torch.nn import functional as F
-from torchvision.models import resnet18, ResNet18_Weights
+from torchvision.models import ResNet18_Weights, resnet18
+
 from .attention import Attention  # , SelfAttention
-from torch import Tensor
+
+logger = logging.getLogger(__name__)
+logger.propagate = True
 
 
 class CRNN(nn.Module):
@@ -25,6 +31,7 @@ class CRNN(nn.Module):
         use_attention: bool = True,
         use_ctc: bool = True,
         grayscale: bool = False,
+        sequence_length: Optional[int] = None,
     ):
         super().__init__()
         self.resolution = resolution
@@ -33,6 +40,10 @@ class CRNN(nn.Module):
         self.use_attention = use_attention
         self.use_ctc = use_ctc
         self.grayscale = grayscale
+        self.sequence_length = sequence_length
+
+        if not self.use_ctc and self.sequence_length is not None:
+            logger.warning("`sequence_length` has not effect if use_ctc = False.")
 
         self.num_classes = num_chars + 1
 
@@ -57,6 +68,13 @@ class CRNN(nn.Module):
 
         if not use_ctc:
             self.cross_entropy = nn.CrossEntropyLoss().to(self.device)
+
+        if sequence_length is not None:
+            self.linear_reshape = nn.Linear(
+                in_features=int(torch.ceil(torch.tensor(self.resolution[0] / 4)) * self.dims),
+                out_features=self.sequence_length * self.dims,
+            )
+
 
     def _calc_linear_layer(self):
         width, height = self.resolution
@@ -85,6 +103,12 @@ class CRNN(nn.Module):
 
         features = self.drop(F.relu(self.linear(x)))  # [bs,45,256]: 45x256 vector of image features
         # 45 is going to be the sequence length
+
+        # Reshape into sequence length, if known
+        features = torch.flatten(features, start_dim=1)
+        features = F.relu(self.linear_reshape(features))
+        features = features.view(-1, self.sequence_length, self.dims)
+
         return features
 
     def forward(self, images, targets=None):

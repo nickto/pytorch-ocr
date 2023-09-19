@@ -4,7 +4,7 @@ import os
 
 def _get_level() -> int:
     """Get logging level from environment variable."""
-    level = os.getenv("LOGGING_LEVEL", "INFO")
+    level = os.getenv("LOG_LEVEL", "INFO")
     try:
         return int(level)
     except ValueError:
