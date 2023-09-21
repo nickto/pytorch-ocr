@@ -44,7 +44,6 @@ def run_training(cfg):
         use_attention=cfg.model.use_attention,
         use_ctc=cfg.model.use_ctc,
         grayscale=cfg.model.gray_scale,
-        sequence_length=7, # this is manually set for now
     ).to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=cfg.training.lr)
