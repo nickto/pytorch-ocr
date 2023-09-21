@@ -50,6 +50,6 @@ def load_model(path, device: str = "cpu") -> Tuple[CRNN, List[str]]:
         use_ctc=params["crnn"]["use_ctc"],
         grayscale=params["crnn"]["grayscale"],
     ).to(device)
-    model.load_state_dict(torch.load(state_path), map_location=torch.device(device))
+    model.load_state_dict(torch.load(state_path, map_location=torch.device(device)))
     model.eval()
     return model, params["classes"]
