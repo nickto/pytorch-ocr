@@ -120,10 +120,7 @@ def main(cfg):
         use_ctc=cfg.model.use_ctc,
         grayscale=cfg.model.gray_scale,
     ).to(device)
-    model.load_state_dict(
-        torch.load(cfg.paths.save_model_as),
-        map_location=torch.device(device),
-    )
+    model.load_state_dict(torch.load(cfg.paths.save_model_as))
     model.eval()
     filepath = "dataset/eBwsgwf.png"
     answer = inference(filepath, model, cfg)

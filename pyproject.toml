@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pytorch-ocr"
-version = "0.2.1"
+version = "0.2.0"
 description = "Simple framework for OCR using PyTorch."
 authors = ["Gabriel Dornelles", "Nick To <nick@nickto.net>"]
 license = "MIT"
