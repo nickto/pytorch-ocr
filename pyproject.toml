@@ -19,6 +19,13 @@ matplotlib = "3.5.3"
 pytest = "^7.4.2"
 poetry = "^1.6.1"
 
+[tool.poetry.group.dev.dependencies]
+rope = "^1.9.0"
+isort = "^5.12.0"
+black = "^23.9.1"
+pytest = "^7.4.2"
+torchsummary = "^1.5.1"
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
