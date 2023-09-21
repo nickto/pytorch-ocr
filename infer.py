@@ -20,7 +20,7 @@ def main():
 
     for file in glob(args.PATH):
         answer = infer(file, model, classes, "cpu")
-        print("".join(answer))
+        print(answer[0]) # because sinle image
 
 
 if __name__ == "__main__":

@@ -48,6 +48,7 @@ def infer(image_path, model: CRNN, classes: List[str], device: str = "cpu"):
         preds, _ = model(images=image)
 
     if model.use_ctc:
+        preds = preds.permute(1, 0, 2)
         answer = decode_predictions(preds, classes)
     else:
         answer = decode_padded_predictions(preds, classes)

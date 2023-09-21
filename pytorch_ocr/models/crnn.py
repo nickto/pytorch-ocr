@@ -64,13 +64,6 @@ class CRNN(nn.Module):
         if not use_ctc:
             self.cross_entropy = nn.CrossEntropyLoss().to(self.device)
 
-        if sequence_length is not None:
-            self.linear_reshape = nn.Linear(
-                in_features=int(torch.ceil(torch.tensor(self.resolution[0] / 4)) * self.dims),
-                out_features=self.sequence_length * self.dims,
-            )
-
-
     def _calc_linear_layer(self):
         width, height = self.resolution
         channel = 1 if self.grayscale else 3
