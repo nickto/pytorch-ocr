@@ -2,14 +2,14 @@ defaults:
   - override hydra/job_logging: custom
 
 processing:
-  device: cpu
-  image_width: 160 # default: 320
-  image_height: 75 # default: 150
+  device: cuda
+  image_width: 160
+  image_height: 75
 
 training:
-  lr: 9e-4 # default: 3e-4
+  lr: 3e-4
   batch_size: 8
-  num_workers: 8
+  num_workers: 4
   num_epochs: 200
 
 bools:
@@ -18,7 +18,7 @@ bools:
   SAVE_CHECKPOINTS: true
 
 paths:
-  dataset_dir: ./dataset
+  dataset_glob: ./dataset/???????.png
   save_model_as: ./logs/csdd
   save_dir: ./logs
 
@@ -26,4 +26,4 @@ model:
   use_attention: true
   use_ctc: true
   gray_scale: true
-  dims: 64 # default 256
+  dims: 256
