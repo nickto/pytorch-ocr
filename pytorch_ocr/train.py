@@ -77,10 +77,8 @@ def run_training(cfg):
 
         for vp in valid_preds:
             if model.use_ctc:
-                print(vp.shape)
                 current_preds = decode_predictions(vp, training_classes)
             else:
-                print(vp)
                 current_preds = decode_padded_predictions(vp, training_classes)
             valid_captcha_preds.extend(current_preds)
 
