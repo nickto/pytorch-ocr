@@ -16,10 +16,10 @@ def main():
     with initialize(config_path="configs", version_base=None):
         cfg = compose(config_name="config", overrides=args.overrides)
 
-    model, classes = load_model("logs/csdd", cfg.processing.device)
+    model, classes = load_model("logs/csdd", "cpu")
 
     for file in glob(args.PATH):
-        answer = infer(file, model, classes, cfg)
+        answer = infer(file, model, classes, "cpu")
         print("".join(answer))
 
 
