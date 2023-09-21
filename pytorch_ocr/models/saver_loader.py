@@ -7,11 +7,11 @@ import yaml
 from .crnn import CRNN
 
 
-def save_model(model: CRNN, classes: List[str], path: str, override: bool = False):
-    if os.path.exists(path) and not override:
+def save_model(model: CRNN, classes: List[str], path: str, overwrite: bool = False):
+    if os.path.exists(path) and not overwrite:
         raise FileExistsError(f"save_dir {path} already exists. Set override=True to override.")
-    if os.path.exists(path) and override:
-        print(f"overriding save_dir {path}")
+    if os.path.exists(path) and overwrite:
+        print(f"overwriting save_dir {path}")
         shutil.rmtree(path)
     os.makedirs(path, exist_ok=True)
 
