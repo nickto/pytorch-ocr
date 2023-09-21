@@ -118,7 +118,7 @@ def run_training(cfg):
     # 4. Save model + logging and plotting + classes
     logger.info(f"Finished training. Best Accuracy was: {(best_acc*100):.2f}%")
     model.load_state_dict(best_model_wts)
-    save_model(model, training_classes, cfg.paths.save_model_as)
+    save_model(model, training_classes, cfg.paths.save_model_as, overwrite=True)
     logger.info(f"Saving model on {cfg.paths.save_model_as}\nTraining time: {datetime.now()-start}")
     plot_losses(train_loss_data, valid_loss_data, cfg)
     plot_acc(accuracy_data, cfg)
